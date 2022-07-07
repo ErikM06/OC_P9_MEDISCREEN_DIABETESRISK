@@ -15,12 +15,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-@Controller
+@RestController
 @RequestMapping ("/assess")
 public class DiseaseRiskController {
 
@@ -29,46 +30,29 @@ public class DiseaseRiskController {
     @Autowired
     DiseaseRiskService diseaseRiskService;
 
-    @Autowired
-    PatientClientProxy patientClientProxy;
 
-    @Autowired
-    CalculateAgeFromDob calculateAgeFromDob;
 
     @GetMapping("/id")
-    public ResponseEntity<PatientAssessmentDTO> getAssessById (Long id){
-        String assessmentSentence ="diabetes assessment is: ";
-        Patient patient = patientClientProxy.getPatientById(id);
-        String assessment = diseaseRiskService.getDiseaseRisk(patient);
+    public PatientAssessmentDTO getAssessById (@RequestParam Long id){
+        PatientAssessmentDTO patientAssessmentDTO = new PatientAssessmentDTO();
+        try {
+         patientAssessmentDTO = diseaseRiskService.diabetesAssessementById(id);
 
-        PatientAssessmentDTO patientAssessmentDTO = new PatientAssessmentDTO(
-                patient.getGiven(),patient.getFamily(),calculateAgeFromDob.calculateAge(patient.getDob()),assessmentSentence+assessment);
-
-        return new ResponseEntity<>(patientAssessmentDTO, HttpStatus.OK);
+        } catch (Exception e){
+            e.getMessage();
+        }
+        return patientAssessmentDTO;
     }
 
     @GetMapping("/familyName")
-    public ResponseEntity<List<PatientAssessmentDTO>> getAssessByFamilyName (@RequestParam String familyName){
-        List<PatientAssessmentDTO> patientAssessmentDTOLs = new ArrayList<>();
+    public List<PatientAssessmentDTO> getAssessByFamilyName (@RequestParam String familyName){
+            List<PatientAssessmentDTO> patientAssessmentDTOTolist = new ArrayList<>();
+            try {
+                patientAssessmentDTOTolist = diseaseRiskService.diabetesAssessementByfamilyName(familyName);
+            } catch (Exception e){
+                e.getMessage();
+            }
 
-        List<Patient> patientLs = patientClientProxy.getPatientByFamily(familyName);
-        logger.info("patientLs size is "+patientLs.size());
-
-        patientLs.forEach(p -> {
-            String assessmentSentence ="diabetes assessment is: ";
-            String assessment = diseaseRiskService.getDiseaseRisk(p);
-            PatientAssessmentDTO patientAssessmentDTO = new PatientAssessmentDTO(
-                    p.getGiven(),p.getFamily(),calculateAgeFromDob.calculateAge(p.getDob()),assessmentSentence+assessment);
-            patientAssessmentDTOLs.add(patientAssessmentDTO);
-
-        });
-        logger.info("patientAssessmentDTOls size: "+patientAssessmentDTOLs.size());
-
-        return new ResponseEntity<>(patientAssessmentDTOLs, HttpStatus.OK);
+        return patientAssessmentDTOTolist;
     }
-
-
-
-
-
 }

@@ -1,7 +1,9 @@
 package com.mediscreen.diabetesriskservice.services;
 
 
+import com.mediscreen.diabetesriskservice.dto.PatientAssessmentDTO;
 import com.mediscreen.diabetesriskservice.model.Patient;
+import com.mediscreen.diabetesriskservice.proxy.PatientClientProxy;
 import com.mediscreen.diabetesriskservice.services.util.CalculateAgeFromDob;
 import com.mediscreen.diabetesriskservice.services.util.FamilyTypes;
 import org.slf4j.Logger;
@@ -9,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 /**
  * This service Calculate the risk for a patient to contract diabetes
@@ -24,6 +28,11 @@ public class DiseaseRiskService {
     @Autowired
     CalculateAgeFromDob calculateAgeFromDob;
 
+    @Autowired
+    PatientClientProxy patientClientProxy;
+
+
+
     /**
      * The risk/number of trigger words in  medical observations change with the sex and the age of the patient
      * First we get a Patient sex, then the age, finally we evaluate the risk with those 2 parameters
@@ -33,21 +42,14 @@ public class DiseaseRiskService {
      */
     public String getDiseaseRisk(Patient patient) {
         String risk = null;
-        String choice = null;
+        String choice;
         int numberOfTriggers = calculateTriggerService.getTriggerCount(patient.getId());
         int patientAge = calculateAgeFromDob.calculateAge(patient.getDob());
         logger.info("in getDiseaseRisk, number of triggers: " + numberOfTriggers);
         logger.info("patientAge is: " + patientAge);
 
 
-        switch (patient.getSex()) { // switch the method for Male or Female
-            case "F":
-                choice = getChoiceForFemale(patientAge, numberOfTriggers);
-                break;
-            case "M":
-                choice = getChoiceForMale(patientAge, numberOfTriggers);
-                break;
-        }
+        choice = patient.getSex().equals("F") ? getChoiceForFemale(patientAge, numberOfTriggers) : getChoiceForMale(patientAge, numberOfTriggers);
 
         switch (Objects.requireNonNull(choice)) { // the end switch which will receive a String indicating the risk
             case "B":
@@ -75,10 +77,9 @@ public class DiseaseRiskService {
      */
     private String getChoiceForMale(int patientAge, int numberOfTriggers) {
         String riskLevel = null;
-        int choiceByAge = 1;
-        if (patientAge >= 30) {
-            choiceByAge = 2;
-        }
+
+        int choiceByAge = (patientAge>=30) ? 2 : 1;
+
         // 2 case and multiples if statement as risk change with age and number and triggers
         switch (choiceByAge) { // if patient < 30 -> case 1 || if patient >= 30 -> case 2
             case 1:
@@ -112,11 +113,8 @@ public class DiseaseRiskService {
 
     private String getChoiceForFemale(int patientAge, int numberOfTriggers) {
         String riskLevel = null;
-        int choiceByAgeF = 1;
-        if (patientAge >= 30) {
-            choiceByAgeF = 2;
-        }
 
+        int choiceByAgeF = (patientAge>=30) ? 2 : 1;
         // 2 case and multiples if statement as risk change with age and number and triggers
         switch (choiceByAgeF) { // if patient < 30 -> case 1 || if patient >= 30 -> case 2
             case 1:
@@ -182,6 +180,33 @@ public class DiseaseRiskService {
                 break;
         }
         return riskLevel;
+    }
+
+    public PatientAssessmentDTO diabetesAssessementById (Long id){
+        String assessmentSentence ="diabetes assessment is: ";
+        Patient patient = patientClientProxy.getPatientById(id);
+        String assessment = getDiseaseRisk(patient);
+
+        return new PatientAssessmentDTO(
+                patient.getGiven(),patient.getFamily(),calculateAgeFromDob.calculateAge(patient.getDob()),assessmentSentence+assessment);
+    }
+
+    public List<PatientAssessmentDTO> diabetesAssessementByfamilyName (String familyName){
+        List<PatientAssessmentDTO> patientAssessmentDTOLs = new ArrayList<>();
+
+        List<Patient> patientLs = patientClientProxy.getPatientByFamily(familyName);
+        logger.info("patientLs size is "+patientLs.size());
+
+        patientLs.forEach(p -> {
+            String assessmentSentence ="diabetes assessment is: ";
+            String assessment = getDiseaseRisk(p);
+            PatientAssessmentDTO patientAssessmentDTO = new PatientAssessmentDTO(
+                    p.getGiven(),p.getFamily(),calculateAgeFromDob.calculateAge(p.getDob()),assessmentSentence+assessment);
+            patientAssessmentDTOLs.add(patientAssessmentDTO);
+
+        });
+        logger.info("patientAssessmentDTOls size: "+patientAssessmentDTOLs.size());
+        return patientAssessmentDTOLs;
     }
 
 }
