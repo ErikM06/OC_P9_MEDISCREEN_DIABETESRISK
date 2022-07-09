@@ -1,6 +1,8 @@
 package com.mediscreen.diabetesriskservice.services;
 
 
+import com.mediscreen.diabetesriskservice.customExceptions.FamilyNameNotFoundException;
+import com.mediscreen.diabetesriskservice.customExceptions.PatIdNotFoundException;
 import com.mediscreen.diabetesriskservice.dto.PatientAssessmentDTO;
 import com.mediscreen.diabetesriskservice.model.Patient;
 import com.mediscreen.diabetesriskservice.proxy.PatientClientProxy;
@@ -43,10 +45,16 @@ public class DiseaseRiskService {
     public String getDiseaseRisk(Patient patient) {
         String risk = null;
         String choice;
-        int numberOfTriggers = calculateTriggerService.getTriggerCount(patient.getId());
-        int patientAge = calculateAgeFromDob.calculateAge(patient.getDob());
-        logger.info("in getDiseaseRisk, number of triggers: " + numberOfTriggers);
-        logger.info("patientAge is: " + patientAge);
+        int numberOfTriggers = 0;
+        int patientAge = 0;
+        try {
+            numberOfTriggers = calculateTriggerService.getTriggerCount(patient.getId());
+            patientAge = calculateAgeFromDob.calculateAge(patient.getDob());
+            logger.info("in getDiseaseRisk, number of triggers: " + numberOfTriggers);
+            logger.info("patientAge is: " + patientAge);
+        } catch (Exception e){
+            throw new RuntimeException();
+        }
 
 
         choice = patient.getSex().equals("F") ? getChoiceForFemale(patientAge, numberOfTriggers) : getChoiceForMale(patientAge, numberOfTriggers);
@@ -182,26 +190,32 @@ public class DiseaseRiskService {
         return riskLevel;
     }
 
-    public PatientAssessmentDTO diabetesAssessementById (Long id){
-        String assessmentSentence ="diabetes assessment is: ";
-        Patient patient = patientClientProxy.getPatientById(id);
-        String assessment = getDiseaseRisk(patient);
-
+    public PatientAssessmentDTO diabetesAssessmentById(Long id) throws PatIdNotFoundException{
+        Patient patient = new Patient();
+        String assessment = null;
+        try {
+            patient = patientClientProxy.getPatientById(id);
+            assessment = getDiseaseRisk(patient);
+        } catch (Exception e){
+            throw  new PatIdNotFoundException("in DiseaseRiskService pat id: "+id+" not found!");
+        }
         return new PatientAssessmentDTO(
-                patient.getGiven(),patient.getFamily(),calculateAgeFromDob.calculateAge(patient.getDob()),assessmentSentence+assessment);
+                patient.getFirstName(),patient.getLastName(),calculateAgeFromDob.calculateAge(patient.getDob()),assessment);
     }
 
-    public List<PatientAssessmentDTO> diabetesAssessementByfamilyName (String familyName){
+    public List<PatientAssessmentDTO> diabetesAssessmentByFamilyName(String familyName) throws FamilyNameNotFoundException {
         List<PatientAssessmentDTO> patientAssessmentDTOLs = new ArrayList<>();
-
+        if (patientClientProxy.getPatientByFamily(familyName)==null){
+            throw new FamilyNameNotFoundException(" No Patient with familyName: "+familyName+" !");
+        }
         List<Patient> patientLs = patientClientProxy.getPatientByFamily(familyName);
         logger.info("patientLs size is "+patientLs.size());
 
         patientLs.forEach(p -> {
-            String assessmentSentence ="diabetes assessment is: ";
+
             String assessment = getDiseaseRisk(p);
             PatientAssessmentDTO patientAssessmentDTO = new PatientAssessmentDTO(
-                    p.getGiven(),p.getFamily(),calculateAgeFromDob.calculateAge(p.getDob()),assessmentSentence+assessment);
+                    p.getFirstName(),p.getLastName(),calculateAgeFromDob.calculateAge(p.getDob()),assessment);
             patientAssessmentDTOLs.add(patientAssessmentDTO);
 
         });

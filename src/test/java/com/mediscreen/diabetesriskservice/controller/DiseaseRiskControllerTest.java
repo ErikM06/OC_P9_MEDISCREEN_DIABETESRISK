@@ -46,7 +46,7 @@ public class DiseaseRiskControllerTest {
         PatientAssessmentDTO patientAssessmentDTO = new PatientAssessmentDTO("GivenTest","FamilyTypeTest", age,
                diabetesAssess );
 
-        Mockito.when(diseaseRiskService.diabetesAssessementById(patient.getId())).thenReturn(patientAssessmentDTO);
+        Mockito.when(diseaseRiskService.diabetesAssessmentById(patient.getId())).thenReturn(patientAssessmentDTO);
 
         mvc.perform(get("/assess/id"+"?id="+1L)
                         .accept(MediaType.APPLICATION_JSON))
@@ -61,14 +61,13 @@ public class DiseaseRiskControllerTest {
 
         int age = ThreadLocalRandom.current().nextInt();
         int age2 = ThreadLocalRandom.current().nextInt();
-        String diabetesAssess = "diabetesAssessement";
         PatientAssessmentDTO patientAssessmentDTO = new PatientAssessmentDTO("GivenTest","FamilyTypeTest", age,
-                diabetesAssess );
+                familyName);
         PatientAssessmentDTO patientAssessmentDTO2 = new PatientAssessmentDTO("GivenTest2","FamilyTypeTest2", age2,
-                diabetesAssess );
+                familyName);
         List<PatientAssessmentDTO> patientAssessmentDTOLs = new ArrayList<>(Arrays.asList(patientAssessmentDTO, patientAssessmentDTO2));
 
-        Mockito.when(diseaseRiskService.diabetesAssessementByfamilyName(familyName)).thenReturn(patientAssessmentDTOLs);
+        Mockito.when(diseaseRiskService.diabetesAssessmentByFamilyName(familyName)).thenReturn(patientAssessmentDTOLs);
 
         mvc.perform(get("/assess/familyName")
                         .param("familyName", familyName)

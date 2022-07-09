@@ -21,30 +21,30 @@ public class PatientHist {
 
 
     @JsonProperty("Patient")
-    private String family;
+    private String lastName;
 
 
 
     public PatientHist() {
     }
 
-    public PatientHist(String family, String content) {
+    public PatientHist(String lastName, String content) {
         this.content = content;
-        this.family=family;
+        this.lastName = lastName;
 
     }
 
-    public PatientHist(String id, long patId, String content, String family) {
+    public PatientHist(String id, long patId, String content, String lastName) {
         this.id = id;
         this.patId = patId;
         this.content = content;
-        this.family = family;
+        this.lastName = lastName;
     }
 
-    public PatientHist(String id, long patId, String family) {
+    public PatientHist(String id, long patId, String lastName) {
         this.id = id;
         this.patId = patId;
-        this.family = family;
+        this.lastName = lastName;
     }
 
     @Override

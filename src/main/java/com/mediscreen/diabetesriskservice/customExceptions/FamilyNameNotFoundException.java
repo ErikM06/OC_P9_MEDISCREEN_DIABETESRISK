@@ -1,0 +1,11 @@
+package com.mediscreen.diabetesriskservice.customExceptions;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+@ResponseStatus (HttpStatus.NOT_FOUND)
+public class FamilyNameNotFoundException extends Exception{
+
+    public FamilyNameNotFoundException(String msg){
+        super(msg);
+    }
+}

@@ -1,6 +1,7 @@
 package com.mediscreen.diabetesriskservice.services;
 
 
+import com.mediscreen.diabetesriskservice.customExceptions.PatIdNotFoundException;
 import com.mediscreen.diabetesriskservice.model.PatientHist;
 import com.mediscreen.diabetesriskservice.proxy.PatientHistClientProxy;
 import com.mediscreen.diabetesriskservice.services.util.PatientHistContentReader;
@@ -26,7 +27,9 @@ public class CalculateTriggerService {
 
     public Integer getTriggerCount (Long id){
         List<String> triggerCountLs = new ArrayList<>();
-        List<PatientHist> patientHistLs = patientHistClientProxy.getPatientHistByPatId(id);
+        List<PatientHist> patientHistLs;
+        patientHistLs = patientHistClientProxy.getPatientHistByPatId(id);
+
         List<String> triggers = WordsTrigger.listOfWordTriggers;
 
         patientHistLs.forEach (patientHist -> {
