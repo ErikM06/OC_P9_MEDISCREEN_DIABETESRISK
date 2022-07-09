@@ -27,7 +27,13 @@ public class DiseaseRiskController {
     DiseaseRiskService diseaseRiskService;
 
 
-
+    /**
+     *
+     * @param id
+     * @return a patientAssessmentDTO, only few field from Patient.class to match view requirements
+     * basic Patient info + assessment on diabetes risk
+     * @throws PatIdNotFoundException
+     */
     @GetMapping("/id")
     public PatientAssessmentDTO getAssessById (@RequestParam Long id) throws PatIdNotFoundException {
         PatientAssessmentDTO patientAssessmentDTO = new PatientAssessmentDTO();
@@ -39,15 +45,22 @@ public class DiseaseRiskController {
         return patientAssessmentDTO;
     }
 
+    /**
+     *
+     * @param familyName
+     * @returna a list of patientAssessmentDTO, only few field from Patient.class to match view requirements
+     * basic Patient info + assessment on diabetes risk
+     * @throws FamilyNameNotFoundException
+     */
     @GetMapping("/familyName")
     public List<PatientAssessmentDTO> getAssessByFamilyName (@RequestParam String familyName) throws FamilyNameNotFoundException {
-        List<PatientAssessmentDTO> patientAssessmentDTOTolist;
+        List<PatientAssessmentDTO> patientAssessmentDTOToList;
         try {
-            patientAssessmentDTOTolist = diseaseRiskService.diabetesAssessmentByFamilyName(familyName);
+            patientAssessmentDTOToList = diseaseRiskService.diabetesAssessmentByFamilyName(familyName);
         } catch (FamilyNameNotFoundException e){
             throw new FamilyNameNotFoundException("No patient with FamilyName "+ familyName);
         }
 
-        return patientAssessmentDTOTolist;
+        return patientAssessmentDTOToList;
     }
 }

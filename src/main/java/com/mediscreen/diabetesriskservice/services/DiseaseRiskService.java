@@ -45,8 +45,8 @@ public class DiseaseRiskService {
     public String getDiseaseRisk(Patient patient) {
         String risk = null;
         String choice;
-        int numberOfTriggers = 0;
-        int patientAge = 0;
+        int numberOfTriggers;
+        int patientAge;
         try {
             numberOfTriggers = calculateTriggerService.getTriggerCount(patient.getId());
             patientAge = calculateAgeFromDob.calculateAge(patient.getDob());

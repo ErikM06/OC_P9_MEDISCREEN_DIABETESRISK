@@ -9,14 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+
 @Component
-public class PatientHistContentReader {
+public class PatientNoteContentReader {
 
-    Logger logger = LoggerFactory.getLogger(PatientHistContentReader.class);
+    Logger logger = LoggerFactory.getLogger(PatientNoteContentReader.class);
 
-
+    /**
+     *
+     * @param patHistoryContent
+     * @return a List of String formatted without dot and comma
+     */
     public List<String> ToStringListConvertor (String patHistoryContent){
-        List<String> contentToList = new ArrayList<>();
+        List<String> contentToList;
 
         String formatContentWithoutComma = patHistoryContent.replace(",","");
         String formatContentWithoutDot = formatContentWithoutComma.replace(".", "");
@@ -27,7 +32,7 @@ public class PatientHistContentReader {
         contentToList = List.of(split);
 
 
-        // assert every word triggered in content
+        // log every word triggered in content
        // contentToList.forEach(w -> logger.info("in PatientHistContentReader "+ w));
 
 

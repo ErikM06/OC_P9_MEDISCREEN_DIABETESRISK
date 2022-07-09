@@ -1,10 +1,9 @@
 package com.mediscreen.diabetesriskservice.services;
 
 
-import com.mediscreen.diabetesriskservice.customExceptions.PatIdNotFoundException;
 import com.mediscreen.diabetesriskservice.model.PatientHist;
-import com.mediscreen.diabetesriskservice.proxy.PatientHistClientProxy;
-import com.mediscreen.diabetesriskservice.services.util.PatientHistContentReader;
+import com.mediscreen.diabetesriskservice.proxy.PatientNoteClientProxy;
+import com.mediscreen.diabetesriskservice.services.util.PatientNoteContentReader;
 import com.mediscreen.diabetesriskservice.services.util.WordsTrigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,20 +19,26 @@ public class CalculateTriggerService {
 
     Logger logger = LoggerFactory.getLogger(CalculateTriggerService.class);
     @Autowired
-    PatientHistClientProxy patientHistClientProxy;
+    PatientNoteClientProxy patientNoteClientProxy;
 
     @Autowired
-    PatientHistContentReader patientHistContentReader;
+    PatientNoteContentReader patientNoteContentReader;
 
+    /**
+     *
+     * @param id
+     * @return int the size of trigger list.
+     * Looping on patientNote content and match WordsTriggers with converted String from content
+     */
     public Integer getTriggerCount (Long id){
         List<String> triggerCountLs = new ArrayList<>();
-        List<PatientHist> patientHistLs;
-        patientHistLs = patientHistClientProxy.getPatientHistByPatId(id);
+        List<PatientHist> patientNoteLs;
+        patientNoteLs = patientNoteClientProxy.getPatientHistByPatId(id);
 
         List<String> triggers = WordsTrigger.listOfWordTriggers;
 
-        patientHistLs.forEach (patientHist -> {
-            List<String> contentWords = patientHistContentReader.ToStringListConvertor(patientHist.getContent());
+        patientNoteLs.forEach (patientNote -> {
+            List<String> contentWords = patientNoteContentReader.ToStringListConvertor(patientNote.getContent());
 
             contentWords.forEach(cw -> {
                    triggerCountLs.addAll(triggers.stream().filter(t-> t.equals(cw)).collect(Collectors.toList()));
