@@ -33,7 +33,7 @@ public class CalculateTriggerService {
     public Integer getTriggerCount (Long id){
         List<String> triggerCountLs = new ArrayList<>();
         List<PatientHist> patientNoteLs;
-        patientNoteLs = patientNoteClientProxy.getPatientHistByPatId(id);
+        patientNoteLs = patientNoteClientProxy.getPatientNotesByPatId(id);
 
         List<String> triggers = WordsTrigger.listOfWordTriggers;
 
